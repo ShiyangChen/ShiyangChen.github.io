@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)http://chegg-tutors.appspot.com/internship-challenge/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="./Chegg Tutors Engineering_files/styles.css">
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <title>Chegg Tutors Engineering</title>
+    <link rel="icon" type="image/x-icon" href="http://chegg-tutors.appspot.com/public/img/chegg-favicon.ico">
+    <script src="./Chegg Tutors Engineering_files/jquery.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  </head>
+  <body>
+    <div id="chg-balloon-logo-container">
+        <img src="./Chegg Tutors Engineering_files/logo.png">
+    </div>
+    <div id="chg-balloon-controls-container">
+        <p>Enter a username to get started!</p>
+        <input id="chg-balloon-input" maxlength="2048" placeholder="e.g. BalloonMaster99" name="username" autocomplete="off" type="text" value="">
+        <button id="chg-balloon-submit">Check availability</button>
+    </div>
+    <script type="text/javascript">
+
+        // The User search API accepts a comma-separated list of usernames, and returns
+        // user data for any matching records
+
+        $.ajax("http://chegg-tutors.appspot.com/internship-challenge/api/user/?username=Hillary2016").done(function(data) {
+            // This logs Hillary2016's user data, since the username is registered
+            console.log(JSON.stringify(data));
+          });
+
+        $.ajax("http://chegg-tutors.appspot.com/internship-challenge/api/user/?username=Trump4Pres,FeelTheBern1").done(function(data) {
+            // This logs Trump4Pres's user data, since the username is registered, but
+            // no user data for FeelTheBern1, since that username is not currently registered
+            console.log(JSON.stringify(data));
+          });
+
+        // window.alert("loaded");
+        $("#chg-balloon-submit").click(function() {
+                  // This is where you come in!!
+      			var name=document.getElementById('chg-balloon-input').value;
+      			// window.alert(name.value);
+            var obj={username: name};
+            var url="http://chegg-tutors.appspot.com/internship-challenge/api/user/?"+$.param(obj);
+            $.ajax({
+              url: url,
+              dataType: 'json',
+              success: function(response){
+                          if (jQuery.isEmptyObject(response)) {
+                            alert("OK");
+                            window.location.reload();
+                          }
+                          else {
+                            alert(name+" already taken, rename or select from drop list");
+                            console.log(JSON.stringify(response));
+                          }
+                       }
+            });
+
+        });
+        $("#chg-balloon-input").autocomplete({
+
+          // source: [ "c++", "java", "php", "coldfusion", "javascript", "asp", "ruby" ]
+          source: function(request,response){
+                    var suglist = [];
+                    while(true){
+                      if(suglist.length==2) break;
+                      var number = 100 + Math.floor(Math.random() * 899);
+                      var sug=request.term+number;
+                      isAvailable(sug,suglist);
+                    }
+                    while(true){
+                      if(suglist.length==3) break;
+                      var text = ""; var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+                      for( var i=0; i < 5; i++ )
+                        text += possible.charAt(Math.floor(Math.random() * possible.length));
+                      var sug=request.term+"_"+text;
+                      isAvailable(sug,suglist);
+
+                    }
+                    response(suglist);
+            },
+            close: function(event, ui){
+              if(!$("ul.ui-autocomplete").is(":visible")){
+                  $("ul.ui-autocomplete").show();
+              }
+            }
+        });
+        function isAvailable(sug,suglist){
+          var obj={username: sug};
+          var url="http://chegg-tutors.appspot.com/internship-challenge/api/user/?"+$.param(obj);
+          var jsonData;
+          $.ajax({
+            url: url,
+            dataType: 'json',
+            async: false, //setting this field is important;
+            success: function(response){
+                        jsonData = response;
+                     }
+          });
+          if(jQuery.isEmptyObject(jsonData)) {
+            suglist.push(sug);
+            console.log(sug+" been put in sug list");
+          }
+          else{
+            console.log(sug+" already exists");
+          }
+        }
+
+		//<!-- function myFunction() {
+			//var name=document.getElementById('chg-balloon-input');
+			//window.alert(name.value);
+		//} -->
+
+
+    </script>
+
+
+
+</body></html>
